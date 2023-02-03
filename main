@@ -7670,61 +7670,6 @@ elseif menu.game == "pf" then --SECTION PF BEGIN
 		return getupvalue(updateaimstatus, 1)
 	end
 
-	local mousestuff = rawget(client.input, "mouse")
-	if mousestuff then
-		for eventname, event in next, mousestuff do
-			if eventname:match("^onbutton") then
-				for func in next, mousestuff[eventname]._funcs do
-					local thefunction = func
-					mousestuff[eventname]._funcs[func] = nil
-					local function detoured(...)
-						if menu and menu.open then
-							return
-						end
-						thefunction(...)
-					end
-					mousestuff[eventname]._funcs[detoured] = true
-					break
-				end
-			end
-		end
-	end
-
-	client.loadedguns = getupvalue(client.char.unloadguns, 2) -- i hope this works
-	client.lastrepupdate = Vector3.new(-10000, -10000, -1000) --- this is super shit
-	client.roundsystem.lock = nil -- we do a little trolling
-	client.updatersteps = {}
-	client.lastlock = false -- fucking dumb
-
-	client.fakelagpos = Vector3.new()
-	client.fakelagtime = 0
-
-	for _, player in next, Players:GetPlayers() do
-		if player == LOCAL_PLAYER then continue end
-		local updater = client.getupdater(player)
-		if updater then
-			local step = updater.step
-			updater.step = function(what, what1)
-				if not menu then
-					return step(what, what1)
-				else
-					if menu:GetVal("Rage", "Aimbot", "Enabled")
-						or menu:GetKey("Visuals", "Local", "Third Person")
-					then
-						return step(3, true)
-					else
-						return step(what, what1)
-					end
-				end
-			end
-			if not client.updatersteps[player] then client.updatersteps[player] = step end
-		end
-	end
-
-	client.nametagupdaters_cache = {}
-	client.nametagupdaters = getupvalue(client.updateplayernames, 1)
-	client.playernametags = getupvalue(client.updateplayernames, 2)
-
 	setrawmetatable(client.roundsystem, {
 		__index = function(self, val)
 			if not menu or not client then
